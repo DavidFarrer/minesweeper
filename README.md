@@ -1,4 +1,4 @@
-# minesweeper
+# Minesweeper (React.js)
 
 This is a minesweeper game created using React.js.
 
