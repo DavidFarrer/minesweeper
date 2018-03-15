@@ -1,0 +1,32 @@
+*, html {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+.board-row {
+	height: 25px;
+	text-align: center;
+}
+.cell {
+	width: 25px;
+	height: 25px;
+	font-size: 23px;
+	padding: 0;
+	margin: 0;
+	background-color: rgb(211,211,211);
+}
+
+.cell.open {
+	border-style: inset;
+}
+
+.cell:focus {
+	outline: 0;
+}
+
+.cell.flag {
+	background: no-repeat url("./images/flag.png") rgb(211,211,211);
+	background-size: 20px 20px;
+	background-position: 20% 20%;
+}
