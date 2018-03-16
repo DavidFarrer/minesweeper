@@ -30,3 +30,19 @@
 	background-size: 20px 20px;
 	background-position: 20% 20%;
 }
+
+.cell.open.mine {
+	background: no-repeat url("./images/mine.png") #e81212;
+	background-size: 22px 22px;
+}
+
+.gameinfo {
+	margin-top: 10px;
+	text-align: center;
+}
+
+.controls {
+	text-align: center;
+	margin-top: 10px;
+	margin-bottom: 10px;
+}

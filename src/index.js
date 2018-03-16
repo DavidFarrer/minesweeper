@@ -2,24 +2,49 @@ import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
 
-function Cell(props) {
-	let value;
-	let nameClass;
-	const contents = props.cell;
-	if (contents === "flag") {
-		nameClass = "cell flag";
-		value = null;
-	} else if (contents !== null) {
-		value = props.cell === 0 ? null : props.cell;
-		nameClass = "cell open";
-	} else {
-		value = null;
-		nameClass = "cell";
+class Cell extends React.Component {
+	constructor(props) {
+		super(props);
 	}
+	shouldComponentUpdate(nextProps, nextState) {
+		if (this.props.cell !== nextProps.cell) {
+			return true;
+		}
+		return false;
+	}
+	render() {
+		let value;
+		let nameClass;
+		const contents = this.props.cell;
+		if (contents === "flag") {
+			nameClass = "cell flag";
+			value = null;
+		} else if (contents === "mine") {
+			nameClass = "cell open mine";
+			value = null;
+		} else if (contents !== null) {
+			value = this.props.cell === 0 ? null : this.props.cell;
+			nameClass = "cell open";
+		} else {
+			value = null;
+			nameClass = "cell";
+		}
+		return (
+			<button className={nameClass} onClick={this.props.onClick} onContextMenu={(e) => this.props.onRightClick(e)}>
+				{value}
+			</button>
+		);
+	}
+}
+
+function Controls(props) {
 	return (
-		<button className={nameClass} onClick={props.onClick} onContextMenu={(e) => props.onRightClick(e)}>
-			{value}
-		</button>
+		<div className="controls">
+			<button onClick={(e) => props.onClick()}>New Game</button>
+			<button onClick={(e) => props.onClick(9, 9, 10)}>Easy</button>
+			<button onClick={(e) => props.onClick(16, 16, 40)}>Medium</button>
+			<button onClick={(e) => props.onClick(16, 30, 99)}>Expert</button>
+		</div>
 	);
 }
 
@@ -33,7 +58,7 @@ function GameInfo(props) {
 		value = `Mines Remaining: ${props.userMinesRemaining}`;
 	}
 	return (
-		<div>
+		<div className="gameinfo">
 			{value}
 		</div>
 	);
@@ -77,9 +102,9 @@ class MineSweeper extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			mines: 20,
-			rows: 12,
-			cols: 15,
+			mines: 10,
+			rows: 9,
+			cols: 9,
 			mineLocations: [],
 		};
 	}
@@ -99,40 +124,17 @@ class MineSweeper extends React.Component {
 			userMinesRemaining
 		});
 	}
-	isMine(row, col) {
-		return this.state.mineLocations.some(location => location[0] === row && location[1] === col);
+	isMine(row, col, mineLocations) {
+		return mineLocations.some(location => location[0] === row && location[1] === col);
 	}
 	isOpen(row, col, cells) {
 		return cells[row][col] !== null;
 	}
-	initializeCells() {
-		let rows = this.state.rows;
-		let cols = this.state.cols;
-		let minesRemaining = this.state.mines;
-		const mineLocations = [];
-
-		while (minesRemaining) {
-			let randomRow = Math.floor(Math.random() * rows);
-			let randomCol = Math.floor(Math.random() * cols);
-
-			if (!this.isMine(randomRow, randomCol)) {
-				mineLocations.push([randomRow, randomCol]);
-				minesRemaining--;
-			}
-		}
-		this.setState({
-			mineLocations,
-			gameover: false,
-			victory: false,
-			userMinesRemaining: this.state.mines,
-			cells: Array(this.state.rows).fill(Array(this.state.cols).fill(null))
-		});
-	}
 	handleClick(row, col) {
 		if (this.state.gameover || this.isOpen(row, col, this.state.cells)) return;
-		const newCells = this.cloneCells();
-		if (this.isMine(row, col)) {
-			newCells[row][col] = "O";
+		let newCells = this.cloneCells();
+		if (this.isMine(row, col, this.state.mineLocations)) {
+			newCells = this.showAllMines(newCells);
 			console.log("YOU LOSE");
 			this.setState({gameover: true});	
 		} else {
@@ -152,10 +154,16 @@ class MineSweeper extends React.Component {
 			});
 		}
 	}
+	showAllMines(cells) {
+		this.state.mineLocations.forEach(location => {
+			cells[location[0]][location[1]] = "mine";
+		});
+		return cells;
+	}
 	checkVictory(cells) {
 		for (let i = 0; i < this.state.rows; i++) {
 			for (let j = 0; j < this.state.cols; j++) {
-				if (!this.isOpen(i, j, cells) && !this.isMine(i, j)) {
+				if ((!this.isOpen(i, j, cells) || cells[i][j] === "flag") && !this.isMine(i, j, this.state.mineLocations)) {
 					console.log("not open or mine: " + i, j);
 					return false;
 				}
@@ -167,7 +175,7 @@ class MineSweeper extends React.Component {
 		const [minRow, maxRow, minCol, maxCol] = this.minMaxRowCol(row, col);
 		for (let i = minRow; i < maxRow + 1; i++) {
 			for (let j = minCol; j < maxCol + 1; j++) {
-				if (!this.isOpen(i, j, cells) && !this.isMine(i, j)) {
+				if (!this.isOpen(i, j, cells) && !this.isMine(i, j, this.state.mineLocations)) {
 					cells[i][j] = this.countMinesAround(i, j);
 					if (cells[i][j] === 0) {
 						this.propagateEmptySpace(i, j, cells);
@@ -189,12 +197,37 @@ class MineSweeper extends React.Component {
 		const [minRow, maxRow, minCol, maxCol] = this.minMaxRowCol(row, col);
 		for (let i = minRow; i < maxRow + 1; i++) {
 			for (let j = minCol; j < maxCol + 1; j++) {
-				if (this.isMine(i, j)) {
+				if (this.isMine(i, j, this.state.mineLocations)) {
 					minesFound++;
 				}
 			}
 		}
 		return minesFound;
+	}
+	newGame(rows = this.state.rows, cols = this.state.cols, mines = this.state.mines) {
+		console.log(`rows: ${rows}, cols: ${cols}, mines: ${mines}`);
+		let minesRemaining = mines;
+		const mineLocations = [];
+
+		while (minesRemaining) {
+			let randomRow = Math.floor(Math.random() * rows);
+			let randomCol = Math.floor(Math.random() * cols);
+
+			if (!this.isMine(randomRow, randomCol, mineLocations)) {
+				mineLocations.push([randomRow, randomCol]);
+				minesRemaining--;
+			}
+		}
+		this.setState({
+			rows,
+			cols,
+			mines,
+			mineLocations,
+			gameover: false,
+			victory: false,
+			userMinesRemaining: mines,
+			cells: Array(rows).fill(Array(cols).fill(null))
+		});
 	}
 	cloneCells() {
 		const newCells = [];
@@ -204,11 +237,14 @@ class MineSweeper extends React.Component {
 		return newCells;
 	}
 	componentWillMount() {
-		this.initializeCells();
+		this.newGame(this.state.rows, this.state.cols, this.state.mines);
 	}
 	render() {
 		return (
 			<div>
+				<Controls
+					onClick={(rows, cols, mines) => this.newGame(rows, cols, mines)} 
+				/>
 				<Board 
 					cells={this.state.cells}
 					onClick={(row, col) => this.handleClick(row, col)} 
