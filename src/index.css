@@ -2,6 +2,7 @@
 	margin: 0;
 	padding: 0;
 	box-sizing: border-box;
+	text-align: center;
 }
 
 .board-row {
@@ -21,7 +22,7 @@
 	border-style: inset;
 }
 
-.cell:focus {
+button:focus {
 	outline: 0;
 }
 
@@ -36,6 +37,15 @@
 	background-size: 22px 22px;
 }
 
+.gameboard {
+	margin-top: 10px;
+	display: inline-block;
+	border: 1px solid black;
+	-webkit-box-shadow: 4px 4px 21px 0px rgba(0,0,0,0.75);
+	-moz-box-shadow: 4px 4px 21px 0px rgba(0,0,0,0.75);
+	box-shadow: 4px 4px 21px 0px rgba(0,0,0,0.75);
+}
+
 .gameinfo {
 	margin-top: 10px;
 	text-align: center;
@@ -45,4 +55,22 @@
 	text-align: center;
 	margin-top: 10px;
 	margin-bottom: 10px;
+}
+
+.controls button {
+	border-radius: 5px;
+	margin: 5px;
+	padding: 4px;
+	border: 2px solid white;
+	background-color: black;
+	color: white;
+}
+
+.controls button.active {
+	border-color: orange;
+	color: orange;
+}
+
+.controls button:hover {
+	color: lightblue;
 }

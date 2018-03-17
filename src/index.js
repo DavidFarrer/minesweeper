@@ -38,12 +38,23 @@ class Cell extends React.Component {
 }
 
 function Controls(props) {
+	let easy, normal, expert;
+	switch (props.difficulty) {
+		case "easy":
+			easy = "active";
+			break;
+		case "normal":
+			normal = "active";
+			break;
+		default:
+			expert = "active";
+	}
 	return (
 		<div className="controls">
 			<button onClick={(e) => props.onClick()}>New Game</button>
-			<button onClick={(e) => props.onClick(9, 9, 10)}>Easy</button>
-			<button onClick={(e) => props.onClick(16, 16, 40)}>Medium</button>
-			<button onClick={(e) => props.onClick(16, 30, 99)}>Expert</button>
+			<button className={easy} onClick={(e) => props.onClick(9, 9, 10)}>Easy</button>
+			<button className={normal} onClick={(e) => props.onClick(16, 16, 40)}>Normal</button>
+			<button className={expert} onClick={(e) => props.onClick(16, 30, 99)}>Expert</button>
 		</div>
 	);
 }
@@ -90,7 +101,7 @@ class Board extends React.Component {
 			board.push(<div key={rowNum * colNum + colNum} className="board-row">{cellRow}</div>);
 		});
 		return (
-			<div>
+			<div className="gameboard">
 				{board}
 			</div>
 		);
@@ -147,8 +158,9 @@ class MineSweeper extends React.Component {
 			cells: newCells
 		});
 		if (this.checkVictory(newCells)) {
-			console.log("YOU WIN!");
+			newCells = this.showMinesAsFlags(newCells);
 			this.setState({
+				cells: newCells,
 				gameover: true,
 				victory: true
 			});
@@ -157,6 +169,12 @@ class MineSweeper extends React.Component {
 	showAllMines(cells) {
 		this.state.mineLocations.forEach(location => {
 			cells[location[0]][location[1]] = "mine";
+		});
+		return cells;
+	}
+	showMinesAsFlags(cells) {
+		this.state.mineLocations.forEach(location => {
+			cells[location[0]][location[1]] = "flag";
 		});
 		return cells;
 	}
@@ -240,20 +258,32 @@ class MineSweeper extends React.Component {
 		this.newGame(this.state.rows, this.state.cols, this.state.mines);
 	}
 	render() {
+		let difficulty;
+		switch (this.state.mines) {
+			case 10:
+				difficulty = "easy";
+				break;
+			case 40:
+				difficulty = "normal";
+				break;
+			default:
+				difficulty = "expert";
+		}
 		return (
 			<div>
-				<Controls
+				<Controls 
+					difficulty={difficulty} 
 					onClick={(rows, cols, mines) => this.newGame(rows, cols, mines)} 
-				/>
-				<Board 
-					cells={this.state.cells}
-					onClick={(row, col) => this.handleClick(row, col)} 
-					onRightClick={(e, row, col) => this.handleRightClick(e, row, col)} 
 				/>
 				<GameInfo 
 					gameover={this.state.gameover} 
 					victory={this.state.victory} 
 					userMinesRemaining={this.state.userMinesRemaining} 
+				/>
+				<Board 
+					cells={this.state.cells}
+					onClick={(row, col) => this.handleClick(row, col)} 
+					onRightClick={(e, row, col) => this.handleRightClick(e, row, col)} 
 				/>
 			</div>
 		);
