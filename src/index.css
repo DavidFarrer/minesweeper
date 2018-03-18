@@ -5,6 +5,20 @@
 	text-align: center;
 }
 
+body {
+	background-color: grey;
+	font-family: 'Mina', sans-serif;
+}
+
+h1 {
+	margin-top: 15px;
+	text-transform: uppercase;
+	font-family: 'Mina', sans-serif;
+	font-size: 3rem;
+	color: white;
+	text-shadow: 4px 4px 0px rgba(0, 0, 0, 1);
+}
+
 .board-row {
 	height: 25px;
 	text-align: center;
@@ -12,18 +26,52 @@
 .cell {
 	width: 25px;
 	height: 25px;
-	font-size: 23px;
+	font-size: 22px;
 	padding: 0;
+	line-height: 25px;
 	margin: 0;
 	background-color: rgb(211,211,211);
+	position: relative;
+}
+
+.button-label {
+	position: absolute;
+	top: -1px;
+	left: 4px;
 }
 
 .cell.open {
 	border-style: inset;
+	background-color: rgb(204,204,204);
 }
 
 button:focus {
 	outline: 0;
+}
+
+.cell.open.one {
+	color: blue;
+}
+.cell.open.two {
+	color: green;
+}
+.cell.open.three {
+	color: red;
+}
+.cell.open.four {
+	color: darkblue;
+}
+.cell.open.five {
+	color: brown;
+}
+.cell.open.six {
+	color: #00b7b7;
+}
+.cell.open.seven {
+	color: black;
+}
+.cell.open.eight {
+	color: grey;
 }
 
 .cell.flag {
@@ -38,7 +86,6 @@ button:focus {
 }
 
 .gameboard {
-	margin-top: 10px;
 	display: inline-block;
 	border: 1px solid black;
 	-webkit-box-shadow: 4px 4px 21px 0px rgba(0,0,0,0.75);
@@ -49,6 +96,19 @@ button:focus {
 .gameinfo {
 	margin-top: 10px;
 	text-align: center;
+	color: white;
+	letter-spacing: 0.05em;
+	font-variant: small-caps;
+	font-size: 1.3rem;
+	text-shadow: 2px 2px 0px rgba(0, 0, 0, 1);
+}
+
+.gameinfo.victory {
+	color: #59f79b;
+}
+
+.gameinfo.loss {
+	color: #ff4c4c;
 }
 
 .controls {
@@ -72,5 +132,29 @@ button:focus {
 }
 
 .controls button:hover {
+	color: lightblue;
+	border-color: lightblue;
+}
+
+.timer {
+	margin: 0;
+	height: 22px;
+}
+
+.timer .timerSpan {
+	display: inline-block;
+	border: 1px solid black;
+	padding: 2px;
+	line-height: 18px;
+	text-align: center;
+	width: 40px;
+	-webkit-box-shadow: 4px 4px 21px 0px rgba(0,0,0,0.75);
+	-moz-box-shadow: 4px 4px 21px 0px rgba(0,0,0,0.75);
+	box-shadow: 4px 4px 21px 0px rgba(0,0,0,0.75);
+}
+
+.timer .timerSpan span {
+	display: inline-block;
+	width: 10px;
 	color: lightblue;
 }

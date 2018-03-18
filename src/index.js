@@ -16,22 +16,60 @@ class Cell extends React.Component {
 		let value;
 		let nameClass;
 		const contents = this.props.cell;
-		if (contents === "flag") {
-			nameClass = "cell flag";
-			value = null;
-		} else if (contents === "mine") {
-			nameClass = "cell open mine";
-			value = null;
-		} else if (contents !== null) {
-			value = this.props.cell === 0 ? null : this.props.cell;
-			nameClass = "cell open";
-		} else {
-			value = null;
-			nameClass = "cell";
+		switch (contents) {
+			case 0:
+				nameClass = "cell open";
+				value = null;
+				break;
+			case 1:
+				nameClass = "cell open one";
+				value = 1;
+				break;
+			case 2:
+				nameClass = "cell open two";
+				value = 2;
+				break;
+			case 3:
+				nameClass = "cell open three";
+				value = 3;
+				break;
+			case 4:
+				nameClass = "cell open four";
+				value = 4;
+				break;
+			case 5:
+				nameClass = "cell open five";
+				value = 5;
+				break;
+			case 6:
+				nameClass = "cell open six";
+				value = 6;
+				break;
+			case 7:
+				nameClass = "cell open seven";
+				value = 7;
+				break;
+			case 8:
+				nameClass = "cell open eight";
+				value = 8;
+				break;
+			case "flag":
+				nameClass = "cell flag";
+				value = null;
+				break;
+			case "mine":
+				nameClass = "cell open mine";
+				value = null;
+				break;
+			default:
+				nameClass = "cell";
+				value = null;
 		}
 		return (
 			<button className={nameClass} onClick={this.props.onClick} onContextMenu={(e) => this.props.onRightClick(e)}>
-				{value}
+				<p className="button-label">
+					{value}
+				</p>
 			</button>
 		);
 	}
@@ -61,15 +99,19 @@ function Controls(props) {
 
 function GameInfo(props) {
 	let value;
+	let nameClass;
 	if (props.victory) {
 		value = "YOU WIN";
+		nameClass = "gameinfo victory";
 	} else if (props.gameover) {
 		value = "YOU LOSE";
+		nameClass = "gameinfo loss";
 	} else {
 		value = `Mines Remaining: ${props.userMinesRemaining}`;
+		nameClass = "gameinfo";
 	}
 	return (
-		<div className="gameinfo">
+		<div className={nameClass}>
 			{value}
 		</div>
 	);
@@ -116,6 +158,9 @@ class MineSweeper extends React.Component {
 			mines: 10,
 			rows: 9,
 			cols: 9,
+			gameover: true,
+			timerActive: false,
+			timerInterval: null,
 			mineLocations: [],
 		};
 	}
@@ -141,12 +186,38 @@ class MineSweeper extends React.Component {
 	isOpen(row, col, cells) {
 		return cells[row][col] !== null;
 	}
+	startTimerIfInactive() {
+		if (this.state.timerActive) return;
+		this.restartTimer();
+		let timerInterval = setInterval(() => {
+			this.tick()
+		}, 200);
+		this.setState({
+			timerInterval,
+			timerActive: true
+		});
+	}
+	restartTimer() {
+		this.setState({
+			timeElapsed: 0,
+			startTime: Date.now()
+		});
+	}
+	tick() {
+		this.setState({
+			timeElapsed: Math.floor((Date.now() - this.state.startTime) / 1000)
+		});
+		if (this.state.timeElapsed === 999 || this.state.gameover) {
+			clearInterval(this.state.timerInterval);
+		}
+			
+	}
 	handleClick(row, col) {
 		if (this.state.gameover || this.isOpen(row, col, this.state.cells)) return;
+		this.startTimerIfInactive();
 		let newCells = this.cloneCells();
 		if (this.isMine(row, col, this.state.mineLocations)) {
 			newCells = this.showAllMines(newCells);
-			console.log("YOU LOSE");
 			this.setState({gameover: true});	
 		} else {
 			newCells[row][col] = this.countMinesAround(row, col);
@@ -223,7 +294,6 @@ class MineSweeper extends React.Component {
 		return minesFound;
 	}
 	newGame(rows = this.state.rows, cols = this.state.cols, mines = this.state.mines) {
-		console.log(`rows: ${rows}, cols: ${cols}, mines: ${mines}`);
 		let minesRemaining = mines;
 		const mineLocations = [];
 
@@ -236,6 +306,7 @@ class MineSweeper extends React.Component {
 				minesRemaining--;
 			}
 		}
+		clearInterval(this.state.timerInterval);
 		this.setState({
 			rows,
 			cols,
@@ -243,6 +314,8 @@ class MineSweeper extends React.Component {
 			mineLocations,
 			gameover: false,
 			victory: false,
+			timeElapsed: 0,
+			timerActive: false,
 			userMinesRemaining: mines,
 			cells: Array(rows).fill(Array(cols).fill(null))
 		});
@@ -259,6 +332,7 @@ class MineSweeper extends React.Component {
 	}
 	render() {
 		let difficulty;
+		const timeElapsed = this.state.timeElapsed;
 		switch (this.state.mines) {
 			case 10:
 				difficulty = "easy";
@@ -271,6 +345,7 @@ class MineSweeper extends React.Component {
 		}
 		return (
 			<div>
+				<h1>Minesweeper</h1>
 				<Controls 
 					difficulty={difficulty} 
 					onClick={(rows, cols, mines) => this.newGame(rows, cols, mines)} 
@@ -280,6 +355,11 @@ class MineSweeper extends React.Component {
 					victory={this.state.victory} 
 					userMinesRemaining={this.state.userMinesRemaining} 
 				/>
+				<p className="timer">
+					<span className="timerSpan">
+						<span>{Math.floor(timeElapsed / 100)}</span><span>{Math.floor((timeElapsed % 100)/ 10 )}</span><span>{timeElapsed % 10}</span>
+					</span>
+				</p>
 				<Board 
 					cells={this.state.cells}
 					onClick={(row, col) => this.handleClick(row, col)} 
