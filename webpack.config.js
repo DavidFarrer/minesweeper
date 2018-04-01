@@ -1,4 +1,5 @@
 const webpack = require("webpack");
+const path = require("path");
 
 module.exports = {
   entry: [
@@ -29,7 +30,7 @@ module.exports = {
     ]
   },
   output: {
-    path: __dirname + "/dist",
+    path: path.resolve(__dirname + "/dist"),
     publicPath: "/",
     filename: "bundle.js"
   },
